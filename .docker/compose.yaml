@@ -1,0 +1,47 @@
+services:
+  php:
+    build:
+      context: php
+      args:
+          - APP_USER_ID
+    restart: on-failure
+    user: ${APP_USER_ID}:${APP_GROUP_ID}
+    volumes:
+      - ../php/:/app/
+      - ../go/bin/:/app/bin/go/
+      - ./php/php.ini:/usr/local/etc/php/conf.d/app-overrides.ini
+      - php_home:/home/appuser
+    environment:
+      - PHP_IDE_CONFIG
+    working_dir: /app
+    tty: true
+    networks:
+        devapp:
+    extra_hosts:
+        - host.docker.internal:host-gateway
+
+  go:
+    build:
+      context: go
+      args:
+        - APP_USER_ID
+    restart: on-failure
+    user: ${APP_USER_ID}:${APP_GROUP_ID}
+    volumes:
+      - ../go/:/go/src/app
+      - gopkg:/go/pkg
+      - gobin:/go/bin
+    tty: true
+    networks:
+      devapp:
+
+
+networks:
+  devapp:
+    name: devapp
+
+volumes:
+  php_home:
+  go_home:
+  gopkg:
+  gobin:
